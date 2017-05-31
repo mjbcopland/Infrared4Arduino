@@ -1,28 +1,34 @@
 #include "IrSequence.h"
+#include "IrUtility.h"
 #include <string.h>
 
-IrSequence::IrSequence() : durations(NULL), length(0U), toBeFreed(false) {
+IrSequence::IrSequence() : durations(nullptr), length(0) {
 };
 
-IrSequence::IrSequence(const microseconds_t *durations_, size_t length_, boolean toBeFreed_)
-: durations(durations_), length(length_), toBeFreed(toBeFreed_) {
+IrSequence::IrSequence(microseconds_t const* const& durations, size_t length)
+: durations(new microseconds_t[length]), length(length) {
+    memcpy(this->durations, durations, length * sizeof(microseconds_t));
 }
 
-IrSequence::IrSequence(const IrSequence& orig) : durations(orig.durations), length(orig.length), toBeFreed(orig.toBeFreed) {
-};
+IrSequence::IrSequence(microseconds_t const*&& durations, size_t length)
+: durations(durations), length(length) {
+    durations = nullptr;
+}
 
-IrSequence::IrSequence(const IrSequence& orig, boolean toBeFreed_) : durations(orig.durations), length(orig.length), toBeFreed(toBeFreed_) {
-};
+IrSequence::IrSequence(IrSequence const& orig)
+: IrSequence(orig.durations, orig.length) {
+}
+
+IrSequence::IrSequence(IrSequence&& orig)
+: IrSequence(ir::move(orig.durations), orig.length) {
+}
 
 IrSequence::~IrSequence() {
-    if (toBeFreed)
-        delete [] durations;
+    delete[] durations;
 }
 
 IrSequence *IrSequence::clone() const {
-    microseconds_t *durationsClone = new microseconds_t[length];
-    memcpy(durationsClone, durations, length*sizeof(microseconds_t));
-    return new IrSequence(durationsClone, length, true);
+    return new IrSequence(*this);
 }
 
 void IrSequence::dump(Stream& stream, boolean usingSigns) const {

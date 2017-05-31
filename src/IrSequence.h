@@ -13,34 +13,38 @@ class IrSequence {
 private:
     const microseconds_t *durations;
     size_t length;
-    boolean toBeFreed;
 
 public:
     /** Create an empty sequence. */
     IrSequence();
 
     /**
-     * Creates an IrSequence.
+     * Creates an IrSequence. Copies the durations array.
      * @param durations const array of microseconds durations
-     * @param length length of durations. Shuld be even (not checked).
-     * @param toBeFreed If true, the destructor will delete the durations array.
+     * @param length length of durations. Should be even (not checked).
      */
-    IrSequence(const microseconds_t *durations, size_t length, boolean toBeFreed = false);
+    IrSequence(microseconds_t const* const& durations, size_t length);
+
+    /**
+     * Creates an IrSequence. Takes ownership of the durations array.
+     * @param durations const array of microseconds durations
+     * @param length length of durations. Should be even (not checked).
+     */
+    IrSequence(microseconds_t const*&& durations, size_t length);
 
     virtual ~IrSequence();
 
     /**
-     * Performs shallow copy.
+     * Creates an IrSequence. Copies the original data.
      * @param orig original IrSequence to be cloned
      */
     IrSequence(const IrSequence& orig);
 
     /**
-     * Performs shallow copy.
+     * Creates an IrSequence. Takes ownership of the original data.
      * @param orig original IrSequence to be cloned
-     * @param toBeFreed If true, the destructor will delete the durations array.
      */
-    IrSequence(const IrSequence& orig, boolean toBeFreed);
+    IrSequence(IrSequence&& orig);
 
     /**
      * Returns the length of the data.

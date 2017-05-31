@@ -3,6 +3,7 @@
 
 #include "InfraredTypes.h"
 #include "IrSequence.h"
+#include "IrUtility.h"
 
 /**
  * This class models an IR signal with intro-, repeat-, and ending sequences.
@@ -13,26 +14,23 @@ public:
     static const frequency_t defaultFrequency = 38000U;
     static const frequency_t invalidFrequency = (frequency_t) -1;
 
-    IrSignal();
-    IrSignal(const IrSignal& orig);
+    inline IrSignal(const IrSignal& orig)
+    : frequency(orig.frequency), intro(orig.intro), repeat(orig.repeat), ending(orig.ending) {
+    }
 
-    virtual ~IrSignal();
-    IrSignal(const microseconds_t *intro, size_t lengthIntro,
-            const microseconds_t *repeat, size_t lengthRepeat,
-            const microseconds_t *ending, size_t lengthEnding,
-            frequency_t frequency = defaultFrequency,
-            boolean toBeFreed = false);
+    inline IrSignal(IrSignal&& orig)
+    : frequency(orig.frequency), intro(ir::move(orig.intro)), repeat(ir::move(orig.repeat)), ending(ir::move(orig.ending)) {
+    }
 
-    IrSignal(const microseconds_t *intro, size_t lengthIntro,
-            const microseconds_t *repeat, size_t lengthRepeat,
-            frequency_t frequency = defaultFrequency,
-            boolean toBeFreed = false);
+    template<typename T, typename U, typename V>
+    inline IrSignal(T&& intro, U&& repeat, V&& ending, frequency_t frequency)
+    : frequency(frequency), intro(ir::forward<T>(intro)), repeat(ir::forward<U>(repeat)), ending(ir::forward<V>(ending)) {
+    }
 
-    IrSignal(const IrSequence& intro, const IrSequence& repeat, const IrSequence& ending,
-            frequency_t frequency, boolean toBeFreed);
-
-    IrSignal(const IrSequence& intro, const IrSequence& repeat, const IrSequence& ending,
-            frequency_t frequency = defaultFrequency);
+    template<typename T, typename U, typename V>
+    inline IrSignal(T&& intro, size_t introLength, U&& repeat, size_t repeatLength, V&& ending, size_t endingLength, frequency_t frequency)
+    : frequency(frequency), intro(std::forward<T>(intro), introLength), repeat(ir::forward<U>(repeat), repeatLength), ending(ir::forward<V>(ending), endingLength) {
+    }
 
 private:
     const frequency_t frequency;
