@@ -1,5 +1,6 @@
 #include "Rc5Decoder.h"
 #include <string.h>
+#include <stdio.h>
 
 const char *Rc5Decoder::format = "RC5 %d %d %d";
 

@@ -10,7 +10,7 @@
  */
 class IrSequenceReader : public IrReader {
 private:
-    IrSequence irSequence;
+    const IrSequence& irSequence;
 
 public:
     IrSequenceReader() : irSequence() {

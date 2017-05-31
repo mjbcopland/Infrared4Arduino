@@ -1,4 +1,5 @@
 #include "Rc5Renderer.h"
+#include "IrUtility.h"
 
 // NOTE: writing intro[i++] = ... produces wrong result, compiler bug?
 // (Adding a print statement immediately after, and it works :-~)
@@ -13,20 +14,22 @@ const IrSignal *Rc5Renderer::newIrSignal(unsigned int D, unsigned int F) {
     return newIrSignal(D, F, T);
 }
 
-static const IrSequence emptyIrSequence;
-
 const IrSignal *Rc5Renderer::newIrSignal(unsigned int D, unsigned int F, unsigned int T) {
     unsigned int index = 0U;
     int pending = 0;
-    microseconds_t *repeat = new microseconds_t[28];
-    emit(1U, index, pending, repeat);
-    emit(((~F) & 0x40U) >> 6U, index, pending, repeat);
-    emit(T & 1U, index, pending, repeat);
-    emitMsb(D, 5U, index, pending, repeat);
-    emitMsb(F, 6U, index, pending, repeat);
-    emitEnd(index, pending, repeat);
-    IrSequence *repeatSequence = new IrSequence(repeat, index, true);
-    return new IrSignal(emptyIrSequence, *repeatSequence, emptyIrSequence, frequency);
+    microseconds_t *repeatData = new microseconds_t[28];
+    emit(1U, index, pending, repeatData);
+    emit(((~F) & 0x40U) >> 6U, index, pending, repeatData);
+    emit(T & 1U, index, pending, repeatData);
+    emitMsb(D, 5U, index, pending, repeatData);
+    emitMsb(F, 6U, index, pending, repeatData);
+    emitEnd(index, pending, repeatData);
+
+    IrSequence intro  = IrSequence();
+    IrSequence repeat = IrSequence(ir::move(repeatData), index);
+    IrSequence ending = IrSequence();
+
+    return new IrSignal(ir::move(intro), ir::move(repeat), ir::move(ending), frequency);
 }
 
 void Rc5Renderer::emitMsb(unsigned int x, unsigned int length,

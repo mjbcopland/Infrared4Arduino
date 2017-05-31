@@ -16,6 +16,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 */
 
 #include "IrReader.h"
+#include "IrUtility.h"
 
 // Cannot use IrSequence.dump directly!
 void IrReader::dump(Stream &stream) const {
@@ -33,5 +34,5 @@ IrSequence *IrReader::toIrSequence() const {
     microseconds_t *durations = new microseconds_t[getDataLength()];
     for (unsigned int i = 0; i < getDataLength(); i++)
         durations[i] = getDuration(i);
-    return new IrSequence(durations, getDataLength(), true);
+    return new IrSequence(ir::move(durations), getDataLength());
 }

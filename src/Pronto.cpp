@@ -1,5 +1,6 @@
 #include "Pronto.h"
 #include "IrSignal.h"
+#include "IrUtility.h"
 #include <string.h>
 
 IrSignal *Pronto::parse(const uint16_t *data, size_t size) {
@@ -24,7 +25,7 @@ IrSignal *Pronto::parse(const uint16_t *data, size_t size) {
     IrSequence *repeat = mkSequence(data + 4 + 2*introPairs, repetitionPairs, timebase);
     IrSequence *ending = new IrSequence();
 
-    IrSignal *code = new IrSignal(*intro, *repeat, *ending, frequency, true);
+    IrSignal *code = new IrSignal(ir::move(*intro), ir::move(*repeat), ir::move(*ending), frequency);
 
     delete intro;
     delete repeat;
@@ -53,5 +54,5 @@ IrSequence *Pronto::mkSequence(const uint16_t* data, size_t noPairs, double time
         uint32_t duration = (uint32_t) (data[i] * timebase);
         durations[i] = (microseconds_t)((duration <= MICROSECONDS_T_MAX) ? duration : MICROSECONDS_T_MAX);
     }
-    return new IrSequence(durations, 2*noPairs, false);
+    return new IrSequence(ir::move(durations), 2*noPairs);
 }

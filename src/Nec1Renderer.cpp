@@ -1,4 +1,5 @@
 #include "Nec1Renderer.h"
+#include "IrUtility.h"
 
 // NOTE: writing intro[i++] = ... produces wrong result, compiler bug?
 // (Adding a print statement immediately after, and it works :-~)
@@ -6,9 +7,7 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-const microseconds_t Nec1Renderer::repeatData[repeatLength] = { 9024, 2256, 564, MIN(96156, MICROSECONDS_T_MAX) };
-const IrSequence Nec1Renderer::repeat(repeatData, repeatLength, false);
-static const IrSequence emptyIrSequence;
+constexpr microseconds_t Nec1Renderer::repeatData[repeatLength] = { 9024, 2256, 564, MIN(96156, MICROSECONDS_T_MAX) };
 
 const IrSignal *Nec1Renderer::newIrSignal(unsigned int D, unsigned int S, unsigned int F) {
     microseconds_t *introData = new microseconds_t[introLength];
@@ -22,8 +21,12 @@ const IrSignal *Nec1Renderer::newIrSignal(unsigned int D, unsigned int S, unsign
     lsbByte(introData, i, sum, 255U-F);
     introData[i] = 564U; i++;
     introData[i] = (microseconds_t) (108000U - sum); i++;
-    IrSequence *introPtr = new IrSequence(introData, introLength, true);
-    return new IrSignal(*introPtr, repeat, emptyIrSequence, frequency);
+    
+    IrSequence intro  = IrSequence(ir::move(introData), introLength);
+    IrSequence repeat = IrSequence(repeatData, repeatLength);
+    IrSequence ending = IrSequence();
+    
+    return new IrSignal(ir::move(intro), ir::move(repeat), ir::move(ending), frequency);
 }
 
 void Nec1Renderer::lsbByte(microseconds_t *intro, unsigned int& i, uint32_t& sum, unsigned int X) {

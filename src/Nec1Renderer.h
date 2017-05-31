@@ -40,7 +40,7 @@ public:
 private:
     Nec1Renderer();
     static const microseconds_t repeatData[repeatLength];
-    static const IrSequence repeat;
+    
     static void lsbByte(microseconds_t *intro, unsigned int& i, uint32_t& sum, unsigned int D);
     static void process(microseconds_t *intro, unsigned int& i, uint32_t& sum, unsigned int data);
 };
